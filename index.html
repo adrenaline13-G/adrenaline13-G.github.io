@@ -71,6 +71,16 @@
 
 <script>
 
+    function formatTime(timestamp){
+        const d = new Date(timestamp);
+        const y = d.getFullYear();
+        const m = String(d.getMonth()+1).padStart(2,'0');
+        const day = String(d.getDate()).padStart(2,'0');
+        const h = String(d.getHours()).padStart(2,'0');
+        const min = String(d.getMinutes()).padStart(2,'0');
+        return `${y}.${m}.${day} ${h}:${min}`;
+    }
+
     function deletePost(id){
         posts = posts.filter(p => p.id !== id);
         save();
@@ -119,7 +129,8 @@
             nick: localStorage.getItem("isAdmin") ? "운영자" : `ㅇㅇ(${userIP})`,
             likes: 0,
             dislikes: 0,
-            comments: []
+            comments: [],
+            time: Date.now()
         });
 
         save();
@@ -173,10 +184,14 @@
         displayPosts.forEach((post) => {
             const postEl = document.createElement("div");
             postEl.className = "post";
+            if(post.likes >= 10) postEl.style.background = "#1b2d45";
             postEl.innerHTML = `
                 <div class="post-header">
                     <strong style="font-size:18px">${escapeHTML(post.title)}</strong>
-                    <span class="nick" style="color:${post.nick==='운영자'?'orange':'#888'}">${post.nick}</span>
+                    <div style="text-align:right;">
+                        <div class="nick" style="color:${post.nick==='운영자'?'orange':'#888'}">${post.nick}</div>
+                        <div style="font-size:11px;color:#666">${formatTime(post.time)}</div>
+                    </div>
                 </div>
                 <div class="content">${escapeHTML(post.content)}</div>
                 <div class="actions">
@@ -187,7 +202,7 @@
                 <div class="comment-section">
                     ${post.comments.map(c => `
                         <div class="comment">
-                            <strong style="color:${c.nick==='운영자'?'orange':'white'}">${c.nick}</strong>
+                            <strong style="color:${c.nick==='운영자'?'orange':'white'}">${c.nick}</strong> : ${escapeHTML(c.text)}
                         </div>
                     `).join('')}
                     <div class="comment-input-group">
