@@ -33,6 +33,7 @@ header{
 }
 button{
     cursor:pointer;
+    margin-top:5px;
 }
 .write-btn{
     position:fixed;
@@ -80,7 +81,6 @@ input, textarea{
     <button onclick="addPost()">등록</button>
 </div>
 
-
 <script>
 let isAdmin = localStorage.getItem("isAdmin") || false;
 let posts = JSON.parse(localStorage.getItem("posts")) || [];
@@ -127,21 +127,22 @@ function addPost(){
 
 function likePost(i){
     if(voted["post"+i]) return;
-
     posts[i].likes++;
     voted["post"+i]=true;
-
     save();
     render();
 }
 
-
 function dislikePost(i){
     if(voted["post"+i]) return;
-
     posts[i].dislikes++;
     voted["post"+i]=true;
+    save();
+    render();
+}
 
+function deletePost(i){
+    posts.splice(i,1);
     save();
     render();
 }
@@ -162,29 +163,18 @@ function addComment(i){
 
 function likeComment(i,j){
     if(voted["comment"+i+"-"+j]) return;
-
     posts[i].comments[j].likes++;
     voted["comment"+i+"-"+j]=true;
-
     save();
     render();
 }
 
 function dislikeComment(i,j){
     if(voted["comment"+i+"-"+j]) return;
-
     posts[i].comments[j].dislikes++;
     voted["comment"+i+"-"+j]=true;
-
     save();
     render();
-
-    function deletePost(i){
-    posts.splice(i,1);
-    save();
-    render();
-}
-
 }
 
 function render(){
@@ -199,10 +189,10 @@ function render(){
             <h2>${post.title}</h2>
             <p>${post.content}</p>
             <small style="color:${post.nick==='운영자'?'orange':'white'}">${post.nick}</small><br>
+
             <button onclick="likePost(${i})">추천 ${post.likes}</button>
             <button onclick="dislikePost(${i})">비추천 ${post.dislikes}</button>
             ${isAdmin ? `<button onclick="deletePost(${i})">삭제</button>` : ""}
-            
 
             <div>
                 <input id="commentInput${i}" placeholder="댓글쓰기">
@@ -212,7 +202,7 @@ function render(){
             ${post.comments.map((c,j)=>`
                 <div class="comment">
                     ${c.text}<br>
-                    <small style="color:${c.nick==='운영자'?'orange':'white'}">${c.nick}</small>
+                    <small style="color:${c.nick==='운영자'?'orange':'white'}">${c.nick}</small><br>
                     <button onclick="likeComment(${i},${j})">추천 ${c.likes}</button>
                     <button onclick="dislikeComment(${i},${j})">비추천 ${c.dislikes}</button>
                 </div>
@@ -223,11 +213,8 @@ function render(){
     });
 }
 
-
-
 render();
 </script>
-
 
 </body>
 </html>
