@@ -1,16 +1,109 @@
 <!DOCTYPE html>
-<html>
+<html lang="ko">
 <head>
+<meta charset="UTF-8">
 <title>잇다</title>
-<link rel="icon" type="image/png" href="favicon.png">
+<link rel="icon" href="./favicon.png">
+
+<style>
+body{
+    margin:0;
+    font-family:sans-serif;
+    background:#111;
+    color:white;
+}
+
+header{
+    background:#000;
+    padding:20px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    border-bottom:1px solid #333;
+}
+
+.logo{
+    font-size:32px;
+    font-weight:bold;
+}
+
+nav a{
+    color:white;
+    margin-left:20px;
+    text-decoration:none;
+}
+
+.container{
+    width:80%;
+    margin:30px auto;
+}
+
+.post{
+    background:#1a1a1a;
+    padding:20px;
+    margin-bottom:15px;
+    border-radius:10px;
+    cursor:pointer;
+}
+
+.post:hover{
+    background:#222;
+}
+
+.post-title{
+    font-size:20px;
+    font-weight:bold;
+}
+
+.post-content{
+    margin-top:10px;
+    color:#aaa;
+}
+
+.write-btn{
+    position:fixed;
+    right:30px;
+    bottom:30px;
+    background:white;
+    color:black;
+    border:none;
+    padding:15px 20px;
+    font-size:18px;
+    border-radius:50px;
+    cursor:pointer;
+}
+</style>
 </head>
+
 <body>
 
-<h1>잇다 메인페이지</h1>
-<button onclick="alert('작동됨')">눌러봐</button>
+<header>
+    <div class="logo">ITDA</div>
+    <nav>
+        <a href="#">홈</a>
+        <a href="#">인기글</a>
+        <a href="#">자유게시판</a>
+    </nav>
+</header>
+
+<div class="container">
+
+    <div class="post">
+        <div class="post-title">첫 번째 글</div>
+        <div class="post-content">여기에 글 내용 미리보기가 들어감</div>
+    </div>
+
+    <div class="post">
+        <div class="post-title">두 번째 글</div>
+        <div class="post-content">커뮤니티 느낌으로 확장 가능</div>
+    </div>
+
+</div>
+
+<button class="write-btn" onclick="alert('글쓰기 기능 예정')">+</button>
 
 <script>
-console.log("사이트 연결 성공");
+console.log("잇다 커뮤니티 실행중");
 </script>
 
 </body>
