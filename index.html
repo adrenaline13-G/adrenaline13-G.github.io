@@ -80,15 +80,25 @@ input, textarea{
     <button onclick="addPost()">등록</button>
 </div>
 
+
 <script>
 let posts = JSON.parse(localStorage.getItem("posts")) || [];
 
+let userIP = localStorage.getItem("userIP");
+if(!userIP){
+    userIP = Math.floor(Math.random()*900+100)+"."+Math.floor(Math.random()*900+100);
+    localStorage.setItem("userIP", userIP);
+}
+
+let voted = JSON.parse(localStorage.getItem("voted")) || {};
+
 function randomNick(){
-    return "ㅇㅇ(" + Math.floor(Math.random()*900+100)+"."+Math.floor(Math.random()*900+100)+")";
+    return "ㅇㅇ(" + userIP + ")";
 }
 
 function save(){
     localStorage.setItem("posts", JSON.stringify(posts));
+    localStorage.setItem("voted", JSON.stringify(voted));
 }
 
 function openModal(){
@@ -114,13 +124,21 @@ function addPost(){
 }
 
 function likePost(i){
+    if(voted["post"+i]) return;
+
     posts[i].likes++;
+    voted["post"+i]=true;
+
     save();
     render();
 }
 
 function dislikePost(i){
+    if(voted["post"+i]) return;
+
     posts[i].dislikes++;
+    voted["post"+i]=true;
+
     save();
     render();
 }
@@ -140,13 +158,21 @@ function addComment(i){
 }
 
 function likeComment(i,j){
+    if(voted["comment"+i+"-"+j]) return;
+
     posts[i].comments[j].likes++;
+    voted["comment"+i+"-"+j]=true;
+
     save();
     render();
 }
 
 function dislikeComment(i,j){
+    if(voted["comment"+i+"-"+j]) return;
+
     posts[i].comments[j].dislikes++;
+    voted["comment"+i+"-"+j]=true;
+
     save();
     render();
 }
@@ -187,6 +213,7 @@ function render(){
 
 render();
 </script>
+
 
 </body>
 </html>
