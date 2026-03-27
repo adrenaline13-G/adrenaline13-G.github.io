@@ -212,7 +212,7 @@ function render(){
             ${post.comments.map((c,j)=>`
                 <div class="comment">
                     ${c.text}<br>
-                    <small>${c.nick}</small><br>
+                    <small style="color:${c.nick==='운영자'?'orange':'white'}">${c.nick}</small>
                     <button onclick="likeComment(${i},${j})">추천 ${c.likes}</button>
                     <button onclick="dislikeComment(${i},${j})">비추천 ${c.dislikes}</button>
                 </div>
