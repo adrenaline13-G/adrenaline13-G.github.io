@@ -76,6 +76,17 @@ input, textarea{
     border-radius:5px;
 }
 
+.header-left{
+    display:flex;
+    align-items:center;
+    gap:30px;
+}
+
+.logo{
+    font-size:30px;
+    font-weight:bold;
+}
+
 .left-menu{
     display:flex;
     gap:20px;
@@ -95,12 +106,13 @@ input, textarea{
 <body>
 
 <header>
-    <div class="left-menu">
-        <span onclick="showHome()">홈</span>
-        <span onclick="showBest()">실베</span>
+    <div class="header-left">
+        <div class="logo">ITDA</div>
+        <div class="left-menu">
+            <span onclick="showHome()">홈</span>
+            <span onclick="showBest()">실베</span>
+        </div>
     </div>
-
-    <div>ITDA</div>
 
     <div class="notice">설립자:신가람 운영자 재량으로 경고없이 게시물이 삭제될수있습니다.</div>
 </header>
@@ -214,60 +226,22 @@ function dislikeComment(i,j){
 
     save();
     render();
+}
 
-    function deletePost(i){
+function deletePost(i){
     posts.splice(i,1);
     save();
     render();
+}
 
-    function showHome(){
+function showHome(){
     mode="home";
     render();
-    }
+}
 
-    function showBest(){
+function showBest(){
     mode="best";
     render();
-    }
-}
-
-}
-
-function render(){
-    const container=document.getElementById("posts");
-    container.innerHTML="";
-
-    posts.forEach((post,i)=>{
-    if(mode==="best" && post.likes < 10) return;
-        const div=document.createElement("div");
-        div.className="post"+(post.likes>=10?" blue":"");
-
-        div.innerHTML=`
-            <h2>${post.title}</h2>
-            <p>${post.content}</p>
-            <small style="color:${post.nick==='운영자'?'orange':'white'}">${post.nick}</small><br>
-            <button onclick="likePost(${i})">추천 ${post.likes}</button>
-            <button onclick="dislikePost(${i})">비추천 ${post.dislikes}</button>
-            ${isAdmin ? `<button onclick="deletePost(${i})">삭제</button>` : ""}
-            
-
-            <div>
-                <input id="commentInput${i}" placeholder="댓글쓰기">
-                <button onclick="addComment(${i})">등록</button>
-            </div>
-
-            ${post.comments.map((c,j)=>`
-                <div class="comment">
-                    ${c.text}<br>
-                    <small style="color:${c.nick==='운영자'?'orange':'white'}">${c.nick}</small>
-                    <button onclick="likeComment(${i},${j})">추천 ${c.likes}</button>
-                    <button onclick="dislikeComment(${i},${j})">비추천 ${c.dislikes}</button>
-                </div>
-            `).join("")}
-        `;
-
-        container.appendChild(div);
-    });
 }
 
 
@@ -275,11 +249,6 @@ function render(){
 render();
 </script>
 
-
-</body>
-</html>
-render();
-</script>
 
 </body>
 </html>
