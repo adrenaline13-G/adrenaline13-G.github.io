@@ -8,102 +8,184 @@
 <style>
 body{
     margin:0;
-    font-family:sans-serif;
     background:#111;
     color:white;
+    font-family:sans-serif;
 }
-
 header{
-    background:#000;
+    background:black;
     padding:20px;
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    border-bottom:1px solid #333;
-}
-
-.logo{
-    font-size:32px;
+    font-size:30px;
     font-weight:bold;
 }
-
-nav a{
-    color:white;
-    margin-left:20px;
-    text-decoration:none;
-}
-
 .container{
     width:80%;
-    margin:30px auto;
+    margin:20px auto;
 }
-
 .post{
     background:#1a1a1a;
     padding:20px;
     margin-bottom:15px;
     border-radius:10px;
+}
+.blue{
+    background:#1d3557;
+}
+button{
     cursor:pointer;
 }
-
-.post:hover{
-    background:#222;
-}
-
-.post-title{
-    font-size:20px;
-    font-weight:bold;
-}
-
-.post-content{
-    margin-top:10px;
-    color:#aaa;
-}
-
 .write-btn{
     position:fixed;
     right:30px;
     bottom:30px;
-    background:white;
-    color:black;
+    width:60px;
+    height:60px;
+    border-radius:50%;
     border:none;
-    padding:15px 20px;
-    font-size:18px;
-    border-radius:50px;
-    cursor:pointer;
+    font-size:30px;
+}
+.modal{
+    display:none;
+    position:fixed;
+    top:20%;
+    left:50%;
+    transform:translateX(-50%);
+    background:#222;
+    padding:20px;
+    border-radius:10px;
+}
+input, textarea{
+    width:300px;
+    margin:10px 0;
+}
+.comment{
+    margin-top:10px;
+    padding:10px;
+    background:#222;
+    border-radius:5px;
 }
 </style>
 </head>
-
 <body>
 
-<header>
-    <div class="logo">ITDA</div>
-    <nav>
-        <a href="#">홈</a>
-        <a href="#">인기글</a>
-        <a href="#">자유게시판</a>
-    </nav>
-</header>
+<header>ITDA</header>
 
-<div class="container">
+<div class="container" id="posts"></div>
 
-    <div class="post">
-        <div class="post-title">첫 번째 글</div>
-        <div class="post-content">여기에 글 내용 미리보기가 들어감</div>
-    </div>
+<button class="write-btn" onclick="openModal()">+</button>
 
-    <div class="post">
-        <div class="post-title">두 번째 글</div>
-        <div class="post-content">커뮤니티 느낌으로 확장 가능</div>
-    </div>
-
+<div class="modal" id="modal">
+    <input id="title" placeholder="제목"><br>
+    <textarea id="content" placeholder="내용"></textarea><br>
+    <button onclick="addPost()">등록</button>
 </div>
 
-<button class="write-btn" onclick="alert('글쓰기 기능 예정')">+</button>
-
 <script>
-console.log("잇다 커뮤니티 실행중");
+let posts = JSON.parse(localStorage.getItem("posts")) || [];
+
+function randomNick(){
+    return "ㅇㅇ(" + Math.floor(Math.random()*900+100)+"."+Math.floor(Math.random()*900+100)+")";
+}
+
+function save(){
+    localStorage.setItem("posts", JSON.stringify(posts));
+}
+
+function openModal(){
+    document.getElementById("modal").style.display="block";
+}
+
+function addPost(){
+    const title=document.getElementById("title").value;
+    const content=document.getElementById("content").value;
+
+    posts.unshift({
+        title,
+        content,
+        nick:randomNick(),
+        likes:0,
+        dislikes:0,
+        comments:[]
+    });
+
+    save();
+    render();
+    document.getElementById("modal").style.display="none";
+}
+
+function likePost(i){
+    posts[i].likes++;
+    save();
+    render();
+}
+
+function dislikePost(i){
+    posts[i].dislikes++;
+    save();
+    render();
+}
+
+function addComment(i){
+    const text=document.getElementById("commentInput"+i).value;
+
+    posts[i].comments.push({
+        text,
+        nick:randomNick(),
+        likes:0,
+        dislikes:0
+    });
+
+    save();
+    render();
+}
+
+function likeComment(i,j){
+    posts[i].comments[j].likes++;
+    save();
+    render();
+}
+
+function dislikeComment(i,j){
+    posts[i].comments[j].dislikes++;
+    save();
+    render();
+}
+
+function render(){
+    const container=document.getElementById("posts");
+    container.innerHTML="";
+
+    posts.forEach((post,i)=>{
+        const div=document.createElement("div");
+        div.className="post"+(post.likes>=10?" blue":"");
+
+        div.innerHTML=`
+            <h2>${post.title}</h2>
+            <p>${post.content}</p>
+            <small>${post.nick}</small><br>
+            <button onclick="likePost(${i})">추천 ${post.likes}</button>
+            <button onclick="dislikePost(${i})">비추천 ${post.dislikes}</button>
+
+            <div>
+                <input id="commentInput${i}" placeholder="댓글쓰기">
+                <button onclick="addComment(${i})">등록</button>
+            </div>
+
+            ${post.comments.map((c,j)=>`
+                <div class="comment">
+                    ${c.text}<br>
+                    <small>${c.nick}</small><br>
+                    <button onclick="likeComment(${i},${j})">추천 ${c.likes}</button>
+                    <button onclick="dislikeComment(${i},${j})">비추천 ${c.dislikes}</button>
+                </div>
+            `).join("")}
+        `;
+
+        container.appendChild(div);
+    });
+}
+
+render();
 </script>
 
 </body>
