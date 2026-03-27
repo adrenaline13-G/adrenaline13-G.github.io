@@ -82,6 +82,7 @@ input, textarea{
 
 
 <script>
+let isAdmin = localStorage.getItem("isAdmin") || false;
 let posts = JSON.parse(localStorage.getItem("posts")) || [];
 
 let userIP = localStorage.getItem("userIP");
@@ -93,6 +94,7 @@ if(!userIP){
 let voted = JSON.parse(localStorage.getItem("voted")) || {};
 
 function randomNick(){
+    if(isAdmin) return "운영자";
     return "ㅇㅇ(" + userIP + ")";
 }
 
@@ -132,6 +134,7 @@ function likePost(i){
     save();
     render();
 }
+
 
 function dislikePost(i){
     if(voted["post"+i]) return;
@@ -175,6 +178,13 @@ function dislikeComment(i,j){
 
     save();
     render();
+
+    function deletePost(i){
+    posts.splice(i,1);
+    save();
+    render();
+}
+
 }
 
 function render(){
@@ -188,9 +198,11 @@ function render(){
         div.innerHTML=`
             <h2>${post.title}</h2>
             <p>${post.content}</p>
-            <small>${post.nick}</small><br>
+            <small style="color:${post.nick==='운영자'?'orange':'white'}">${post.nick}</small><br>
             <button onclick="likePost(${i})">추천 ${post.likes}</button>
             <button onclick="dislikePost(${i})">비추천 ${post.dislikes}</button>
+            ${isAdmin ? `<button onclick="deletePost(${i})">삭제</button>` : ""}
+            
 
             <div>
                 <input id="commentInput${i}" placeholder="댓글쓰기">
@@ -210,6 +222,8 @@ function render(){
         container.appendChild(div);
     });
 }
+
+
 
 render();
 </script>
