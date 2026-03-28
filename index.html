@@ -190,6 +190,9 @@ button:disabled{
 </div>
 
 <script>
+    if(location.hash === "#admin1234"){
+        localStorage.setItem("isAdmin","1");
+    }
 const supabaseUrl='https://cnwdrfwnsxyfrtzvhwha.supabase.co';
 const supabaseKey='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNud2RyZnduc3h5ZnJ0enZod2hhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ2MDg1MzgsImV4cCI6MjA5MDE4NDUzOH0.yX27wbbPTmLCipFk-WEPGFQoc8IP5mdegzZRN4b9J4g';
 
@@ -262,6 +265,28 @@ async function addPost(){
     loadPosts();
 }
 
+async function addComment(postId){
+    const input=document.getElementById(`comment-${postId}`);
+    const text=input.value.trim();
+
+    if(!text) return;
+
+    await db.from('comments').insert([{
+        post_id:postId,
+        text,
+        nickname: localStorage.getItem("isAdmin")
+            ? "운영자"
+            : `ㅇㅇ(${userIP})`
+    }]);
+
+    loadPosts();
+}
+
+async function deletePost(id){
+    await db.from('posts').delete().eq('id',id);
+    loadPosts();
+}
+
 async function vote(id,type){
     if(voted[id]){
         alert("이미 참여함");
@@ -269,10 +294,9 @@ async function vote(id,type){
     }
 
     const { data,error } = await db
-        .from('posts')
-        .select('*')
-        .eq('id',id)
-        .single();
+    .from('posts')
+    .select('*, comments(*)')
+.   order('id',{ascending:false});
 
     if(error || !data){
         alert("오류");
@@ -336,18 +360,35 @@ async function loadPosts(){
         const nickname=escapeHTML(post.nickname);
 
         div.innerHTML=`
-            <div class="post-header">
-                <strong>${title}</strong>
-                <div>${nickname}</div>
-            </div>
+    <div class="post-header">
+        <strong>${title}</strong>
+        <div style="color:${nickname==='운영자'?'orange':'#aaa'}">${nickname}</div>
+    </div>
 
-            <div class="content">${content}</div>
+    <div class="content">${content}</div>
 
-            <div class="actions">
-                <button class="btn-like" onclick="vote(${post.id},'up')">추천 ${post.likes}</button>
-                <button class="btn-dislike" onclick="vote(${post.id},'down')">비추 ${post.dislikes}</button>
+    <div class="actions">
+        <button class="btn-like" onclick="vote(${post.id},'up')">추천 ${post.likes}</button>
+        <button class="btn-dislike" onclick="vote(${post.id},'down')">비추 ${post.dislikes}</button>
+
+        ${localStorage.getItem("isAdmin")
+            ? `<button onclick="deletePost(${post.id})">삭제</button>`
+            : ""}
+    </div>
+
+    <div style="margin-top:15px;">
+        ${(post.comments||[]).map(c=>`
+            <div style="padding:6px 0; border-top:1px solid #222;">
+                <b>${c.nickname}</b> : ${c.text}
             </div>
-        `;
+        `).join('')}
+    </div>
+
+    <div style="display:flex; gap:5px; margin-top:10px;">
+        <input id="comment-${post.id}" placeholder="댓글" style="flex:1; background:#111; color:white; border:1px solid #333; padding:8px;">
+        <button onclick="addComment(${post.id})">등록</button>
+    </div>
+`;
 
         container.appendChild(div);
     });
