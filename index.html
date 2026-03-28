@@ -271,7 +271,7 @@ async function addComment(postId){
 
     if(!text) return;
 
-    await db.from('comments').insert([{
+    const { error } = await db.from('comments').insert([{
         post_id:postId,
         text,
         nickname: localStorage.getItem("isAdmin")
@@ -279,6 +279,13 @@ async function addComment(postId){
             : `ㅇㅇ(${userIP})`
     }]);
 
+    if(error){
+        console.log(error);
+        alert("댓글 실패");
+        return;
+    }
+
+    input.value="";
     loadPosts();
 }
 
@@ -294,18 +301,20 @@ async function vote(id,type){
     }
 
     const { data,error } = await db
-    .from('posts')
-    .select('*, comments(*)')
-.   order('id',{ascending:false});
+        .from('posts')
+        .select('*')
+        .eq('id',id)
+        .single();
 
     if(error || !data){
+        console.log(error);
         alert("오류");
         return;
     }
 
     const updateData = type==="up"
-        ? {likes:data.likes+1}
-        : {dislikes:data.dislikes+1};
+        ? {likes:(data.likes||0)+1}
+        : {dislikes:(data.dislikes||0)+1};
 
     const { error:updateError } = await db
         .from('posts')
@@ -313,12 +322,14 @@ async function vote(id,type){
         .eq('id',id);
 
     if(updateError){
+        console.log(updateError);
         alert("실패");
         return;
     }
 
     voted[id]=true;
     localStorage.setItem("voted",JSON.stringify(voted));
+
     loadPosts();
 }
 
@@ -328,10 +339,17 @@ function changeMode(m){
 }
 
 async function loadPosts(){
-    const { data,error } = await db
-        .from('posts')
-        .select('*')
-        .order('id',{ascending:false});
+const { data,error } = await db
+    .from('posts')
+    .select(`
+        *,
+        comments (
+            id,
+            text,
+            nickname
+        )
+    `)
+    .order('id',{ascending:false});
 
     const container=document.getElementById("postsContainer");
     container.innerHTML="";
