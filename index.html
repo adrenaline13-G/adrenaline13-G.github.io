@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' https://cdn.jsdelivr.net https://*.supabase.co; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; connect-src https://*.supabase.co;">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ITDA - 잇다</title>
@@ -190,9 +191,9 @@ button:disabled{
 </div>
 
 <script>
-    if(location.hash === "#admin1234"){
-        localStorage.setItem("isAdmin","1");
-    }
+    if(location.hash === "#itda_owner_7841"){
+    localStorage.setItem("isAdmin","1");
+}
 const supabaseUrl='https://cnwdrfwnsxyfrtzvhwha.supabase.co';
 const supabaseKey='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNud2RyZnduc3h5ZnJ0enZod2hhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ2MDg1MzgsImV4cCI6MjA5MDE4NDUzOH0.yX27wbbPTmLCipFk-WEPGFQoc8IP5mdegzZRN4b9J4g';
 
@@ -227,9 +228,20 @@ function closeModal(){
 }
 
 async function addPost(){
+    let lastWrite=0;
     const title=document.getElementById("title").value.trim();
     const content=document.getElementById("content").value.trim();
     const submitBtn=document.getElementById("submitBtn");
+if(Date.now()-lastWrite<5000){
+    alert("5초 후 작성 가능");
+    return;
+}
+lastWrite=Date.now();
+
+    if(/[<>]/.test(title) || /[<>]/.test(content)){
+    alert("특수문자 제한");
+    return;
+}
 
     if(title.length<1 || content.length<1){
         alert("내용 입력");
@@ -279,17 +291,29 @@ async function addComment(postId){
             : `ㅇㅇ(${userIP})`
     }]);
 
+    if(/[<>]/.test(text)){
+    alert("특수문자 제한");
+    return;
+}
+
     if(error){
         console.log(error);
         alert("댓글 실패");
         return;
     }
 
+    if(Date.now()-lastWrite<3000){
+    alert("잠시 후 댓글 가능");
+    return;
+}
+lastWrite=Date.now();
+
     input.value="";
     loadPosts();
 }
 
 async function deletePost(id){
+    if(!localStorage.getItem("isAdmin")) return;
     await db.from('posts').delete().eq('id',id);
     loadPosts();
 }
@@ -396,10 +420,10 @@ const { data,error } = await db
 
     <div style="margin-top:15px;">
         ${(post.comments||[]).map(c=>`
-            <div style="padding:6px 0; border-top:1px solid #222;">
-                <b>${c.nickname}</b> : ${c.text}
-            </div>
-        `).join('')}
+    <div style="padding:6px 0; border-top:1px solid #222;">
+        <b>${escapeHTML(c.nickname)}</b> : ${escapeHTML(c.text)}
+    </div>
+`).join('')}
     </div>
 
     <div style="display:flex; gap:5px; margin-top:10px;">
